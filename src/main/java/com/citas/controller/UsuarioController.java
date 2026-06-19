@@ -19,6 +19,8 @@ public List<Usuario> listar(){return service.listar();}
 @PostMapping
 public Usuario guardar(@RequestBody Usuario u){return service.guardar(u);}
 
+
+        
 @DeleteMapping("/{id}")
 public void eliminar(@PathVariable Long id){service.eliminar(id);}
 }

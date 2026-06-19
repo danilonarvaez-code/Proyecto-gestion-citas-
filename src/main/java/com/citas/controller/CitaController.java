@@ -10,15 +10,31 @@ import com.citas.service.CitaService;
 @RequestMapping("/citas")
 public class CitaController {
 
-@Autowired
-private CitaService service;
+    @Autowired
+    private CitaService service;
 
-@GetMapping
-public List<Cita> listar(){return service.listar();}
+    // GET: http://localhost:8080/citas
+    @GetMapping
+    public List<Cita> listar() {
+        return service.listar();
+    }
 
-@PostMapping
-public Cita guardar(@RequestBody Cita c){return service.guardar(c);}
+    // POST: http://localhost:8080/citas
+    @PostMapping
+    public Cita guardar(@RequestBody Cita c) {
+        return service.guardar(c);
+    }
 
-@DeleteMapping("/{id}")
-public void eliminar(@PathVariable Long id){service.eliminar(id);}
+    // PUT: http://localhost:8080/citas/{id}
+    @PutMapping("/{id}")
+public Cita actualizar(@PathVariable Long id, @RequestBody Cita c) {
+    c.setId(id); // <-- ESTA LÍNEA ES OBLIGATORIA para que sepa qué cita actualizar
+    return service.guardar(c);                                                                                                                   
+}
+
+    // DELETE: http://localhost:8080/citas/{id}
+    @DeleteMapping("/{id}")
+    public void eliminar(@PathVariable Long id) {
+        service.eliminar(id);
+    }
 }
