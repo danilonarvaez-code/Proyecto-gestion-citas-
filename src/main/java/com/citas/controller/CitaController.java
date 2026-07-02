@@ -8,31 +8,36 @@ import com.citas.service.CitaService;
 
 @RestController
 @RequestMapping("/citas")
+@CrossOrigin(origins = "http://localhost:5173")
 public class CitaController {
 
     @Autowired
     private CitaService service;
 
-    // GET: http://localhost:8080/citas
+    // GET: Listar todas las citas
     @GetMapping
     public List<Cita> listar() {
         return service.listar();
     }
 
-    // POST: http://localhost:8080/citas
+    // POST: Guardar una nueva cita
     @PostMapping
     public Cita guardar(@RequestBody Cita c) {
+        // Validación de seguridad para la relación ManyToOne
+        if (c.getUsuario() != null && c.getUsuario().getId() == null) {
+            c.setUsuario(null);
+        }
         return service.guardar(c);
     }
 
-    // PUT: http://localhost:8080/citas/{id}
+    // PUT: Actualizar una cita existente
     @PutMapping("/{id}")
-public Cita actualizar(@PathVariable Long id, @RequestBody Cita c) {
-    c.setId(id); // <-- ESTA LÍNEA ES OBLIGATORIA para que sepa qué cita actualizar
-    return service.guardar(c);                                                                                                                   
-}
+    public Cita actualizar(@PathVariable Long id, @RequestBody Cita c) {
+        c.setId(id); 
+        return service.guardar(c);                                                                                                                                                 
+    }
 
-    // DELETE: http://localhost:8080/citas/{id}
+    // DELETE: Eliminar una cita
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Long id) {
         service.eliminar(id);

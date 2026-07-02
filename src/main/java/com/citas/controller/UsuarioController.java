@@ -2,13 +2,13 @@ package com.citas.controller;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*; // Simplifica los imports de annotations
+import org.springframework.web.bind.annotation.*;
 import com.citas.entity.Usuario;
 import com.citas.service.UsuarioService;
 
 @RestController
 @RequestMapping("/usuarios")
-@CrossOrigin(origins = "*") // Opcional: Evita problemas de CORS si te conectas desde el frontend
+@CrossOrigin(origins = "http://localhost:5173")
 public class UsuarioController {
 
     @Autowired
@@ -26,12 +26,11 @@ public class UsuarioController {
         return service.guardar(u);
     }
 
-    // PUT: Modificar un usuario existente (¡ESTO ES LO QUE TE FALTABA!)
+    // PUT: Modificar un usuario existente
     @PutMapping("/{id}")
     public Usuario actualizar(@PathVariable Long id, @RequestBody Usuario u) {
-        // Aquí idealmente seteas el ID al objeto antes de guardar para asegurarte de que actualice
-        // u.setId(id); 
-        return service.guardar(u); // O service.actualizar(u) si tienes un método específico
+        u.setId(id);
+        return service.guardar(u);
     }
 
     // DELETE: Eliminar un usuario por su ID
