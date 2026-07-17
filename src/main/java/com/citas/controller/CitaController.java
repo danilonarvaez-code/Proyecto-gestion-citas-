@@ -1,77 +1,55 @@
 package com.citas.controller;
 
-import com.citas.entity.Cita;
-import com.citas.service.CitaService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.citas.entity.Cita;
+import com.citas.repository.CitaRepository;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/citas") // Ruta base para el agendamiento y gestión de citas
+@RequestMapping("/api/citas")
+@CrossOrigin(origins = "http://localhost:5173")
 public class CitaController {
 
     @Autowired
-    private CitaService citaService;
+    private CitaRepository citaRepository;
 
-    // 1. GET: http://localhost:8080/api/citas (Listar todas las citas)
     @GetMapping
     public List<Cita> listarTodas() {
-        return citaService.obtenerTodas();
+        return citaRepository.findAll();
     }
 
-    // 2. GET por ID: http://localhost:8080/api/citas/{id} (Buscar una cita específica)
     @GetMapping("/{id}")
     public ResponseEntity<Cita> buscarPorId(@PathVariable Long id) {
-        try {
-            return citaService.obtenerPorId(id)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return citaRepository.findById(id)
+                .map(cita -> ResponseEntity.ok().body(cita))
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // 3. GET por Paciente: http://localhost:8080/api/citas/paciente/{usuarioId}
-    @GetMapping("/paciente/{usuarioId}")
-    public ResponseEntity<List<Cita>> listarPorPaciente(@PathVariable Long usuarioId) {
-        List<Cita> citas = citaService.obtenerCitasPorPaciente(usuarioId);
-        return ResponseEntity.ok(citas);
-    }
-
-    // 4. POST: http://localhost:8080/api/citas (Agendar una nueva cita)
     @PostMapping
-    public ResponseEntity<?> agendar(@RequestBody Cita cita) {
-        try {
-            Cita nuevaCita = citaService.agendarCita(cita);
-            return new ResponseEntity<>(nuevaCita, HttpStatus.CREATED); // 201 Created
-        } catch (IllegalArgumentException e) {
-            // Si el usuario no existe o faltan datos, devuelve un error 400 Bad Request con el mensaje explicativo
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public Cita guardar(@RequestBody Cita cita) {
+        return citaRepository.save(cita);
     }
 
-    // 5. PUT: http://localhost:8080/api/citas/{id} (Modificar o cambiar estado de la cita)
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody Cita citaActualizada) {
-        try {
-            Cita citaModificada = citaService.actualizarCita(id, citaActualizada);
-            return ResponseEntity.ok(citaModificada);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<Cita> actualizar(@PathVariable Long id, @RequestBody Cita citaDetalles) {
+        return citaRepository.findById(id)
+                .map(citaExistente -> {
+                    citaExistente.setFechaHora(citaDetalles.getFechaHora());
+                    citaExistente.setEspecialidad(citaDetalles.getEspecialidad());
+                    citaExistente.setUsuario(citaDetalles.getUsuario());
+                    Cita actualizada = citaRepository.save(citaExistente);
+                    return ResponseEntity.ok().body(actualizada);
+                }).orElse(ResponseEntity.notFound().build());
     }
 
-    // 6. DELETE: http://localhost:8080/api/citas/{id} (Eliminar una cita)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        try {
-            citaService.eliminar(id);
-            return ResponseEntity.noContent().build(); // 204 No Content
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Object> eliminar(@PathVariable Long id) {
+        return citaRepository.findById(id)
+                .map(cita -> {
+                    citaRepository.delete(cita);
+                    return ResponseEntity.noContent().build();
+                }).orElse(ResponseEntity.notFound().build());
     }
 }
