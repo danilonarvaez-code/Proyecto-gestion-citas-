@@ -1,4 +1,10 @@
 package com.citas.repository;
-import org.springframework.data.jpa.repository.JpaRepository;
+
 import com.citas.entity.Usuario;
-public interface UsuarioRepository extends JpaRepository<Usuario, Long>{}
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+    // Al heredar de JpaRepository, Spring ya sabe qué hacer con la entidad Usuario usando su ID (Long)
+}
